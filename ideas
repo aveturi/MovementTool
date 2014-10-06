@@ -1,0 +1,10 @@
+build up a path out of pairs of points and a specific movement between each 
+pair
+
+do a damping motion thing
+
+should be able to chain moveAlongLineSegments
+
+able to bind keys to movements or something like that
+
+add a recording feature to record movement of an object as moved by a dev
