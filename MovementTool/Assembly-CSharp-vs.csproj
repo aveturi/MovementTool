@@ -46,11 +46,11 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Capsule.cs" />
+     <Compile Include="Assets\FigureOfEight.cs" />
+     <Compile Include="Assets\Marker.cs" />
      <Compile Include="Assets\Movement.cs" />
-     <Compile Include="Assets\Quad.cs" />
-     <Compile Include="Assets\SemiCircle.cs" />
-     <Compile Include="Assets\Sphere.cs" />
+     <Compile Include="Assets\Test.cs" />
+     <Compile Include="Assets\TestTwo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

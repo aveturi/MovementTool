@@ -4,11 +4,14 @@ using System.Collections.Generic;
 
 public class Movement {
 
-	public enum MovementPath {Circular, Quad, ZigZag, Line};
+	public enum Type {Line, Curve, Circle, None};
 
 
 	GameObject entity;
-	MovementPath path;
+
+	GameObject markerPrefab;
+
+	Type path;
 	Dictionary<string, object> list;
 
 	List<MovementPrimitive> movementPrimitivesList;
@@ -19,15 +22,10 @@ public class Movement {
 
 	bool periodic;
 
-	public Movement(GameObject entity, MovementPath path, Dictionary<string,object> list, bool periodic = false){
-		this.entity = entity;
-		this.path = path;
-		this.list = list;
-		this.periodic = periodic;
-		if (path == MovementPath.Quad) {
-			quadTimeStart = Time.time;
-		}
-	}
+
+	bool running = false;
+	int repetitions = 0;
+	bool trail = false;
 
 	public Movement(GameObject entity, List<MovementPrimitive> listArg, bool periodic = false){
 		// the list is a list of primitives, which are two points and a specified motion between the two points
@@ -38,16 +36,64 @@ public class Movement {
 		currentMovementidx = 0;
 	}
 
+	public Movement(GameObject entity){
+		this.entity = entity;
+		this.movementPrimitivesList = new List<MovementPrimitive> ();
+	}
+
+	public void AddPrimitive(Movement.Type path, Vector3 start, Vector3 end, float dur,Vector3 dep = default(Vector3), float st = 0){
+		this.movementPrimitivesList.Add (new MovementPrimitive (path,start,end,dur,dep,st));
+	}
+
+	public void Start(){
+		movementPrimitivesList = AdjustTimes(movementPrimitivesList) as List<MovementPrimitive>;
+		currentMovementidx = 0;
+		this.running = true;
+	}
+
+	public void SetRepeat(int num = 0){
+		if (num != 0) {
+			this.repetitions = num;
+		} else {
+			this.periodic = true;
+		}
+	}
+
+	public void ToggleTrail(){
+		trail = !trail;
+	}
+
+	public void setMarker(GameObject m){
+		this.markerPrefab = m;
+	}
+
+
 	public void Update(){
+		if (!running)
+						return;
+
+
+		if (trail) {
+			//instantiate a marker from prefab and put it here
+			GameObject x = GameObject.Instantiate(markerPrefab) as GameObject;
+			x.transform.position = entity.transform.position;
+		}
+
 		MovementPrimitive current = movementPrimitivesList [currentMovementidx];
 		if (Time.time > (current.startTime + current.duration)) { // time to go to next movement primitive
 
 			if(currentMovementidx == movementPrimitivesList.Count-1){
 
 				if(periodic){
-				currentMovementidx =  0;
-				movementPrimitivesList = AdjustTimes(movementPrimitivesList);
+					this.resetState();
+				} else {
 
+					if(this.repetitions > 1){
+						repetitions--;
+						this.resetState();
+					} else {
+						running = false;
+					}
 				}
 			} else {
 				currentMovementidx++;
@@ -58,25 +104,18 @@ public class Movement {
 		RunPrimitive (current);
 	}
 
-	private void RunPrimitive(MovementPrimitive current){
-		if (current.path == MovementPath.Line) {
-			MoveAlongLineSegment(current.startPoint,current.endPoint,current.startTime,current.duration);
-		}
+	private void resetState(){
+		currentMovementidx =  0;
+		movementPrimitivesList = AdjustTimes(movementPrimitivesList);
 	}
 
-	public void UpdatePosition(){
-		if (path == MovementPath.Circular) {
-			Vector2 center = (Vector2)list [MovementParamNames.center];
-			float radius = (float)list [MovementParamNames.radius];
-			float radialSpeed = (float)list [MovementParamNames.radialSpeed];
-			Circular (center, radius, radialSpeed);
-		} else if (path == MovementPath.Quad) {
-			List<Vector3> positions = new List<Vector3>();
-			positions.Add((Vector2)list [MovementParamNames.pointOne]);
-			positions.Add((Vector2)list [MovementParamNames.pointTwo]);
-			positions.Add((Vector2)list [MovementParamNames.pointThree]);
-			positions.Add((Vector2)list [MovementParamNames.pointFour]);
-			Quad(positions, ref quadTimeStart, timeDuration, periodic);
+	private void RunPrimitive(MovementPrimitive current){
+		if (current.path == Type.Line) {
+			MoveAlongLineSegment (current.startPoint, current.endPoint, current.startTime, current.duration);
+		} else if (current.path == Type.Curve) {
+			MoveAlongCurve (current.startPoint, current.endPoint, current.curveDepth, current.startTime, current.duration);
+		} else if (current.path == Type.Circle) {
+			MoveAlongCircle(current.circleCenter, current.circleRadius, current.startTime, current.duration, current.clockwise);
 		}
 	}
 
@@ -90,12 +129,13 @@ public class Movement {
 	}
 
 
-	void Circular(Vector2 center, float radius, float radialSpeed){
-		Vector2 pos = entity.transform.position;
+	void Circular(Vector3 center, float radius, float radialSpeed){
+		Vector3 pos = entity.transform.position;
 		pos.x = center.x+Mathf.Cos (Time.time * radialSpeed) * radius;
 		pos.y = center.y+Mathf.Sin(Time.time * radialSpeed) * radius;
 		entity.transform.position = pos;
 	}
+
 
 	void Quad(List<Vector3> positions, ref float timeStart, float duration, bool periodic = false){
 
@@ -121,23 +161,52 @@ public class Movement {
 	}
 
 	void ZigZag(float xSpeed, float baseYCoord, float oscillationSpeed, float maxYCoord){
-		Vector2 pos = entity.transform.position;
+		Vector3 pos = entity.transform.position;
 		pos.x += xSpeed;
 		pos.y = baseYCoord + Mathf.Sin(Time.time * oscillationSpeed) * maxYCoord;
 		entity.transform.position = pos;
 	}
 
-	bool MoveAlongLineSegment(Vector2 p1,Vector2 p2, float timeStart, float duration){
+	bool MoveAlongLineSegment(Vector3 p1,Vector3 p2, float timeStart, float duration){
 
 		float u = (Time.time - timeStart) / duration;
 		if (u <= 1) {
 			entity.transform.position = Bezier (u, p1, p2);
 			return true;
 		} else {
-			Vector2 diff = (Vector2)entity.transform.position - p2;
-			if(diff.x < 0.1f && diff.y < 0.1f){
+			Vector3 diff = (Vector3)entity.transform.position - p2;
+			if(Mathf.Abs (diff.x) < 0.1f && Mathf.Abs (diff.y) < 0.1f){
 				return false;
 			}
+		}
+
+		return false;
+	}
+
+	bool MoveAlongCurve(Vector3 start, Vector3 end, Vector3 depth, float timeStart, float duration){
+		float u = (Time.time - timeStart) / duration;
+		if (u <= 1) {
+			entity.transform.position = Bezier (u, start, depth, end);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	bool MoveAlongCircle(Vector3 center, float radius, float timeStart, float duration, bool clockwise){
+		float now = Time.time;
+		if (now < timeStart + duration) {
+			Vector3 pos = entity.transform.position;
+			float speed = (2*Mathf.PI)/duration;
+			if(clockwise){
+				pos.x = center.x + Mathf.Cos ( Mathf.PI*2 - now*speed) * radius;
+				pos.y = center.y + Mathf.Sin ( Mathf.PI*2 - now*speed) * radius;
+			} else {
+				pos.x = center.x + Mathf.Cos (now*speed) * radius;
+				pos.y = center.y + Mathf.Sin (now*speed) * radius;
+			}
+			entity.transform.position = pos;
+			return true;
 		}
 
 		return false;
@@ -183,21 +252,33 @@ public sealed class MovementParamNames{
 }
 
 public class MovementPrimitive{
-	public Movement.MovementPath path;
-	public Vector2 startPoint;
-	public Vector2 endPoint;
+	public Movement.Type path;
+	public Vector3 startPoint;
+	public Vector3 endPoint;
 	public float duration;
 	public float startTime;
-			
+	public Vector3 curveDepth;
+	public Vector3 circleCenter;
+	public float   circleRadius;
+	public bool clockwise;
+
 	public MovementPrimitive (){}
 	
-	public MovementPrimitive(Movement.MovementPath p, Vector2 s, Vector2 e, float d, float st = 0){
-		Debug.Log("init prim "+p+" "+s+" "+e+" "+d+" "+st);
-		path = p;
-		startPoint = s;
-		endPoint = e;
-		duration = d;
+	public MovementPrimitive(Movement.Type path, Vector3 start, Vector3 end, float dur,Vector3 dep = default(Vector3), float st = 0){
+		this.path = path;
+		startPoint = start;
+		endPoint = end;
+		duration = dur;
 		startTime = st;
+		curveDepth = dep;
+	}
+
+	public MovementPrimitive(Movement.Type path, Vector3 center, float rad, float dur, bool clock,float st = 0){
+		this.path = path;
+		this.circleCenter = center;
+		circleRadius = rad;
+		duration = dur;
+		startTime = st;
+		this.clockwise = clock;
 	}
 }
-
