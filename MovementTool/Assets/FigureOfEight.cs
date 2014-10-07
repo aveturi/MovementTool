@@ -9,8 +9,7 @@ public class FigureOfEight : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		float SCTimeStart;
-		float SCDuration = 0.5f;
+		float duration = 0.5f;
 		Vector3 p1 = new Vector3(0,0,0);
 		Vector3 p2 = new Vector3(-10,-10,0);
 		Vector3 p3 = new Vector3 (-10,10, 0);
@@ -24,12 +23,12 @@ public class FigureOfEight : MonoBehaviour {
 
 		movement = new Movement (this.gameObject);
 
-		movement.AddPrimitive (Movement.Type.Curve, p1, p2, SCDuration, d3);
-		movement.AddPrimitive (Movement.Type.Curve,p2,p3,SCDuration*2,d1);
-		movement.AddPrimitive (Movement.Type.Curve,p3,p1,SCDuration,d4);
-		movement.AddPrimitive (Movement.Type.Curve,p1,p4,SCDuration,d3);
-		movement.AddPrimitive (Movement.Type.Curve,p4,p5,SCDuration*2,d2);
-		movement.AddPrimitive (Movement.Type.Curve,p5,p1,SCDuration,d4);
+		movement.AddPrimitive (Movement.Type.Curve, p1, p2, duration, d3);
+		movement.AddPrimitive (Movement.Type.Curve,p2,p3,duration*2,d1);
+		movement.AddPrimitive (Movement.Type.Curve,p3,p1,duration,d4);
+		movement.AddPrimitive (Movement.Type.Curve,p1,p4,duration,d3);
+		movement.AddPrimitive (Movement.Type.Curve,p4,p5,duration*2,d2);
+		movement.AddPrimitive (Movement.Type.Curve,p5,p1,duration,d4);
 
 		movement.setMarker (marker);
 		movement.ToggleTrail ();

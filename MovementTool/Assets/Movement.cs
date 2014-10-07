@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class Movement {
 
-	public enum Type {Line, Curve, Circle, None};
+	public enum Type {Line, Curve, Circle, Wait};
 
 
 	GameObject entity;
@@ -17,7 +17,6 @@ public class Movement {
 	List<MovementPrimitive> movementPrimitivesList;
 	int currentMovementidx;
 
-	float timeDuration = 3;
 	float quadTimeStart;
 
 	bool periodic;
