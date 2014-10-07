@@ -50,6 +50,7 @@
      <Compile Include="Assets\Marker.cs" />
      <Compile Include="Assets\Movement.cs" />
      <Compile Include="Assets\Test.cs" />
+     <Compile Include="Assets\TestCirc.cs" />
      <Compile Include="Assets\TestTwo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

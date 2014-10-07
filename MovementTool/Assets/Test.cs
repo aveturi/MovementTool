@@ -15,7 +15,7 @@ public class Test : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 	
-		float dur = 1;
+		float dur = 5;
 			
 		Vector2 p0 = new Vector2 (0, 0);
 		Vector2 p1 = new Vector2 (5, 0);
@@ -27,12 +27,12 @@ public class Test : MonoBehaviour {
 		Vector2 d2 = new Vector2 (-10, 0);
 
 		movement = new Movement (this.gameObject);
-		movement.AddPrimitive (Movement.Type.Line, p0, p1, dur);
-		movement.AddPrimitive (Movement.Type.Curve, p1, p2, dur, d1);
-		movement.AddPrimitive (Movement.Type.Line, p2, p0, dur);
-		movement.AddPrimitive (Movement.Type.Line, p0, p3, dur);
-		movement.AddPrimitive (Movement.Type.Curve, p3, p4, dur, d2);
-		movement.AddPrimitive (Movement.Type.Line, p4, p0, dur);
+		//movement.AddPrimitive (Movement.Type.Line, p0, p1, dur);
+		//movement.AddPrimitive (Movement.Type.Curve, p1, p2, dur, d1);
+		//movement.AddPrimitive (Movement.Type.Line, p2, p0, dur);
+		//movement.AddPrimitive (Movement.Type.Line, p0, p3, dur);
+		//movement.AddPrimitive (Movement.Type.Curve, p3, p4, dur, d2);
+		//movement.AddPrimitive (Movement.Type.Line, p4, p0, dur);
 
 		movement.SetRepeat ();
 		movement.setMarker (marker);

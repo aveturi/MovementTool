@@ -3,8 +3,4 @@ pair
 
 do a damping motion thing
 
-should be able to chain moveAlongLineSegments
-
-able to bind keys to movements or something like that
-
-add a recording feature to record movement of an object as moved by a dev
+should be able to append a motion instead of adding it.

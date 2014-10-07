@@ -26,27 +26,36 @@ public class Movement {
 	int repetitions = 0;
 	bool trail = false;
 
-	public Movement(GameObject entity, List<MovementPrimitive> listArg, bool periodic = false){
-		// the list is a list of primitives, which are two points and a specified motion between the two points
-		// along with a duration. This function should execute each of those primitives in order
-		this.periodic = periodic;
-		this.entity = entity;
-		movementPrimitivesList = AdjustTimes(listArg) as List<MovementPrimitive>;
-		currentMovementidx = 0;
-	}
 
 	public Movement(GameObject entity){
 		this.entity = entity;
 		this.movementPrimitivesList = new List<MovementPrimitive> ();
 	}
 
-	public void AddPrimitive(Movement.Type path, Vector3 start, Vector3 end, float dur,Vector3 dep = default(Vector3), float st = 0){
-		this.movementPrimitivesList.Add (new MovementPrimitive (path,start,end,dur,dep,st));
+	public void AddLine(Vector3 start, Vector3 end, float dur){
+		this.movementPrimitivesList.Add (new MovementPrimitive (Movement.Type.Line,start,end,dur));
 	}
+
+	public void AddCurve(Vector3 start, Vector3 end, float dur,Vector3 dep = default(Vector3)){
+		this.movementPrimitivesList.Add (new MovementPrimitive (Movement.Type.Curve,start,end,dur,dep));
+	}
+
+	public void AddWait(float waitTime){
+		this.movementPrimitivesList.Add (new MovementPrimitive(Movement.Type.Wait,Vector3.zero,Vector3.zero,waitTime));
+	}
+
+	public void Add2DCircular(Vector3 start,Vector3 center, float degrees, float duration){
+
+		float startAngle = 
+
+		//MovementPrimitive(Movement.Type,Circular,start,end, dur,Vector3.zero, center,rotationAngle);
+	}
+
 
 	public void Start(){
 		movementPrimitivesList = AdjustTimes(movementPrimitivesList) as List<MovementPrimitive>;
 		currentMovementidx = 0;
+		entity.transform.position = movementPrimitivesList [0].startPoint;
 		this.running = true;
 	}
 
@@ -71,18 +80,10 @@ public class Movement {
 		if (!running)
 						return;
 
-
-		if (trail) {
-			//instantiate a marker from prefab and put it here
-			GameObject x = GameObject.Instantiate(markerPrefab) as GameObject;
-			x.transform.position = entity.transform.position;
-		}
-
 		MovementPrimitive current = movementPrimitivesList [currentMovementidx];
-		if (Time.time > (current.startTime + current.duration)) { // time to go to next movement primitive
 
+		if (Time.time >= (current.startTime + current.duration)) { // time to go to next movement primitive
 			if(currentMovementidx == movementPrimitivesList.Count-1){
-
 				if(periodic){
 					this.resetState();
 				} else {
@@ -100,13 +101,24 @@ public class Movement {
 			current = movementPrimitivesList[currentMovementidx];
 
 		}
+
+		if (trail) {
+			//instantiate a marker from prefab and put it here
+			GameObject x = GameObject.Instantiate(markerPrefab) as GameObject;
+			x.transform.position = entity.transform.position;
+		}
 		RunPrimitive (current);
 	}
 
 	private void resetState(){
+		Debug.Log ("State Reset " + Time.time);
+		running = false;
 		currentMovementidx =  0;
 		movementPrimitivesList = AdjustTimes(movementPrimitivesList);
+		entity.transform.position = movementPrimitivesList [0].startPoint;
+		running = true;
 	}
+
 
 	private void RunPrimitive(MovementPrimitive current){
 		if (current.path == Type.Line) {
@@ -114,14 +126,16 @@ public class Movement {
 		} else if (current.path == Type.Curve) {
 			MoveAlongCurve (current.startPoint, current.endPoint, current.curveDepth, current.startTime, current.duration);
 		} else if (current.path == Type.Circle) {
-			MoveAlongCircle(current.circleCenter, current.circleRadius, current.startTime, current.duration, current.clockwise);
+			MoveAlongCircle(current.startPoint, current.endPoint, current.startTime, current.duration, current.curveDepth,current.rotationAngle);
 		}
 	}
 
 	private List<MovementPrimitive> AdjustTimes(List<MovementPrimitive> list){
 		list[0].startTime = Time.time;
+		list [0].print ();
 		for(int i=1; i< list.Count; i++){
 			list[i].startTime = list[i-1].startTime + list[i-1].duration;
+			list[i].print();
 		}
 
 		return list;
@@ -192,24 +206,11 @@ public class Movement {
 		}
 	}
 
-	bool MoveAlongCircle(Vector3 center, float radius, float timeStart, float duration, bool clockwise){
-		float now = Time.time;
-		if (now < timeStart + duration) {
-			Vector3 pos = entity.transform.position;
-			float speed = (2*Mathf.PI)/duration;
-			if(clockwise){
-				pos.x = center.x + Mathf.Cos ( Mathf.PI*2 - now*speed) * radius;
-				pos.y = center.y + Mathf.Sin ( Mathf.PI*2 - now*speed) * radius;
-			} else {
-				pos.x = center.x + Mathf.Cos (now*speed) * radius;
-				pos.y = center.y + Mathf.Sin (now*speed) * radius;
-			}
-			entity.transform.position = pos;
-			return true;
-		}
+	void MoveAlongCircle(Vector3 start, Vector3 end,float timeStart, float duration,Vector3 center, float angleOfRotation){
 
-		return false;
+
 	}
+
 	
 	// THESE FUNCTIONS ARE TAKEN FROM THE TEXTBOOK-------------------
 	static public Vector3 Lerp(Vector3 vFrom, Vector3 vTo, float u){
@@ -258,26 +259,23 @@ public class MovementPrimitive{
 	public float startTime;
 	public Vector3 curveDepth;
 	public Vector3 circleCenter;
-	public float   circleRadius;
-	public bool clockwise;
+	public float rotationAngle;
 
 	public MovementPrimitive (){}
 	
-	public MovementPrimitive(Movement.Type path, Vector3 start, Vector3 end, float dur,Vector3 dep = default(Vector3), float st = 0){
+	public MovementPrimitive(Movement.Type path, Vector3 start, Vector3 end, float dur,Vector3 dep = default(Vector3), Vector3 center = default(Vector3),float rotationAngle = 0){
 		this.path = path;
 		startPoint = start;
 		endPoint = end;
 		duration = dur;
-		startTime = st;
+		this.circleCenter = center;
 		curveDepth = dep;
+		this.rotationAngle = rotationAngle;
+		this.startTime = 0;
 	}
 
-	public MovementPrimitive(Movement.Type path, Vector3 center, float rad, float dur, bool clock,float st = 0){
-		this.path = path;
-		this.circleCenter = center;
-		circleRadius = rad;
-		duration = dur;
-		startTime = st;
-		this.clockwise = clock;
+	public void print(){
+		Debug.Log(path+" "+startPoint+" "+endPoint + " " +startTime + " " +duration);
 	}
+
 }

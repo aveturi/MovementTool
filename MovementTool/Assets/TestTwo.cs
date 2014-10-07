@@ -22,10 +22,10 @@ public class TestTwo : MonoBehaviour {
 		Vector2 d3 = new Vector2 (10f, 10);
 		Vector2 d4 = new Vector2 (0f, -20);
 
-		movement.AddPrimitive (Movement.Type.Curve, p1, p2, dur, d1);
-		movement.AddPrimitive (Movement.Type.Curve, p2, p3, dur, d2);
-		movement.AddPrimitive (Movement.Type.Curve, p3, p4, dur, d3);
-		movement.AddPrimitive (Movement.Type.Curve, p4, p1, dur*2, d4);
+		//movement.AddPrimitive (Movement.Type.Curve, p1, p2, dur, d1);
+		//movement.AddPrimitive (Movement.Type.Curve, p2, p3, dur, d2);
+		//movement.AddPrimitive (Movement.Type.Curve, p3, p4, dur, d3);
+		//movement.AddPrimitive (Movement.Type.Curve, p4, p1, dur*2, d4);
 
 		movement.setMarker (marker);
 		movement.ToggleTrail ();
