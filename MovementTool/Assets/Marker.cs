@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Marker : MonoBehaviour {
 
-	int life = 500;
+	int life = 700;
 	// Use this for initialization
 	void Start () {
 	

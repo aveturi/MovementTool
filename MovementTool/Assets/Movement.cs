@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class Movement {
 
-	public enum Type {Line, Curve, Circle, Wait};
+	public enum Type {Line, Curve, Circle, Wait, Sin};
 
 
 	GameObject entity;
@@ -32,8 +32,53 @@ public class Movement {
 		this.movementPrimitivesList = new List<MovementPrimitive> ();
 	}
 
+	public void ChainLine(Vector3 end, float dur){
+		if (movementPrimitivesList.Count == 0) {
+			throw new UnityException("Can't chain a motion event to an empty event set!There should be at least one movement first");
+		}
+
+		this.AddLine (movementPrimitivesList [movementPrimitivesList.Count - 1].endPoint, end, dur);
+	}
+
+
+	public void ChainSin(Vector3 end, float dur, float amplitude, float freq, float phase=0){
+		if (movementPrimitivesList.Count == 0) {
+			throw new UnityException("Can't chain a motion event to an empty event set!There should be at least one movement first");
+		}
+		this.AddSin (movementPrimitivesList [movementPrimitivesList.Count - 1].endPoint , end, dur, amplitude, freq, phase);
+	}
+
+	public void ChainCurve(Vector3 end, float dur,Vector3 dep = default(Vector3)){
+		if (movementPrimitivesList.Count == 0) {
+			throw new UnityException("Can't chain a motion event to an empty event set!There should be at least one movement first");
+		}
+		this.AddCurve (movementPrimitivesList [movementPrimitivesList.Count - 1].endPoint, end, dur, dep);
+	}
+
+	public void ChainCounterClockwiseCircle(Vector3 center, float radians, float duration){
+		if (movementPrimitivesList.Count == 0) {
+			throw new UnityException("Can't chain a motion event to an empty event set!There should be at least one movement first");
+		}
+		this.AddCounterclockwiseCircle (movementPrimitivesList [movementPrimitivesList.Count - 1].endPoint, center, radians, duration);
+	}
+
+	public void ChainClockwiseCircle(Vector3 center, float radians, float duration){
+		if (movementPrimitivesList.Count == 0) {
+			throw new UnityException("Can't chain a motion event to an empty event set!There should be at least one movement first");
+		}
+		this.AddClockwiseCircle (movementPrimitivesList [movementPrimitivesList.Count - 1].endPoint, center, radians, duration);
+	}
+
 	public void AddLine(Vector3 start, Vector3 end, float dur){
 		this.movementPrimitivesList.Add (new MovementPrimitive (Movement.Type.Line,start,end,dur));
+	}
+
+	
+	public void AddSin(Vector3 start, Vector3 end, float dur, float amplitude, float freq, float phase=0){
+		this.movementPrimitivesList.Add (new MovementPrimitive (Movement.Type.Sin, start, end, dur));
+		movementPrimitivesList [movementPrimitivesList.Count - 1].amplitude = amplitude;
+		movementPrimitivesList [movementPrimitivesList.Count - 1].frequency = freq;
+		movementPrimitivesList [movementPrimitivesList.Count - 1].phase = phase;
 	}
 
 	public void AddCurve(Vector3 start, Vector3 end, float dur,Vector3 dep = default(Vector3)){
@@ -44,16 +89,35 @@ public class Movement {
 		this.movementPrimitivesList.Add (new MovementPrimitive(Movement.Type.Wait,Vector3.zero,Vector3.zero,waitTime));
 	}
 
-	public void Add2DCircular(Vector3 start,Vector3 center, float radians, float duration){
-
+	public void AddCounterclockwiseCircle(Vector3 start,Vector3 center, float radians, float duration){
+		if (radians > Mathf.PI * 2) {
+			throw new UnityException("Can't rotate more than 2*PI, use multiple circles or concat if necessary");
+		}
 		var radius = Vector3.Distance (start, center);
 
-		var startAngle = CircleHelperAngle (start, center, radius);
+		var startAngle = CircleHelperAngle (start, center, radius, true);
 		var end = CircleHelperPoint (radians+startAngle, center, radius);
 
 		this.movementPrimitivesList.Add( new MovementPrimitive(Movement.Type.Circle,start,end, 
 		                                                       duration,Vector3.zero, center,radians));
+		movementPrimitivesList [movementPrimitivesList.Count - 1].ccw = true;
 	}
+
+	public void AddClockwiseCircle(Vector3 start, Vector3 center, float radians, float duration){
+		if (radians > Mathf.PI * 2) {
+			throw new UnityException("Can't rotate more than 360 degrees, use multiple circles or concat if necessary");
+		}
+
+		var radius = Vector3.Distance (start, center);
+		
+		var startAngle = CircleHelperAngle (start, center, radius, false);
+		var end = CircleHelperPoint (radians+startAngle, center, radius);
+		
+		this.movementPrimitivesList.Add( new MovementPrimitive(Movement.Type.Circle,start,end, 
+		                                                       duration,Vector3.zero, center,radians));
+		movementPrimitivesList [movementPrimitivesList.Count - 1].ccw = false;
+	}
+
 
 
 	public void Start(){
@@ -131,8 +195,11 @@ public class Movement {
 		} else if (current.path == Type.Curve) {
 			MoveAlongCurve (current.startPoint, current.endPoint, current.curveDepth, current.startTime, current.duration);
 		} else if (current.path == Type.Circle) {
-			MoveAlongCircle(current.startPoint, current.endPoint, current.startTime, current.duration, 
-			                current.curveDepth,current.rotationAngle, current.radius);
+			MoveAlongCircle (current.startPoint, current.endPoint, current.startTime, current.duration, 
+	               current.curveDepth, current.rotationAngle, current.radius, current.ccw);
+		} else if (current.path == Type.Sin) {
+			MoveAlongSineWave(current.startPoint, current.endPoint,current.startTime,current.duration,
+			                  current.amplitude,current.frequency, current.phase);
 		}
 	}
 
@@ -186,6 +253,18 @@ public class Movement {
 		entity.transform.position = pos;
 	}
 
+	void MoveAlongSineWave(Vector3 start, Vector3 end, float timeStart,float dur, float amplitude, float freq, float phase){
+
+		//update the linear position first
+		MoveAlongLineSegment (start, end, timeStart,dur);
+
+		//change the y coord
+		var y = amplitude * Mathf.Sin (2 * Mathf.PI * freq * (Time.time - timeStart) + phase);
+		var pos = entity.transform.position;
+		pos.y += y;
+		entity.transform.position = pos;
+	}
+
 	bool MoveAlongLineSegment(Vector3 p1,Vector3 p2, float timeStart, float duration){
 
 		float u = (Time.time - timeStart) / duration;
@@ -213,48 +292,54 @@ public class Movement {
 	}
 
 	void MoveAlongCircle(Vector3 start, Vector3 end,float timeStart, float duration,
-	                     Vector3 center, float angleOfRotation, float radius){
+	                     Vector3 center, float angleOfRotation, float radius, bool ccw){
 
-		var startAngle = CircleHelperAngle (start, center, radius);
-		//var angleSoFar = CircleHelperRelativeAngle (entity.transform.position, start, center, radius);
+		if (ccw) {
+			var startAngle = CircleHelperAngle (start, center, radius, ccw);
+			Vector3 pos = entity.transform.position;
+			var speed = angleOfRotation / duration;
+			var arg = (Time.time - timeStart) * speed + startAngle;
+			pos.x = center.x+Mathf.Cos (arg) * radius;
+			pos.y = center.y+Mathf.Sin(arg) * radius;
+			entity.transform.position = pos;
 
-		Vector3 pos = entity.transform.position;
-		var speed = angleOfRotation / duration;
-		pos.x = center.x+Mathf.Cos ( (Time.time - timeStart) * speed + startAngle) * radius;
-		pos.y = center.y+Mathf.Sin((Time.time - timeStart) * speed + startAngle) * radius;
-		//Debug.Log ("angle so far " + angleSoFar);
-		//if(angleSoFar < angleOfRotation)
-		entity.transform.position = pos;
-
-	}
-
-
-	float CircleHelperRelativeAngle(Vector3 point, Vector3 start, Vector3 center,float radius){
-		var a = CircleHelperAngle (point, center, radius);
-		var b = CircleHelperAngle (start, center, radius);
-		
-		float v;
-		if (b < a) {
-			v =  (a-b) % (2*Mathf.PI);
 		} else {
-			v = (a-b )% (2*Mathf.PI);
+			var startAngle = CircleHelperAngle (start, center, radius, ccw);
+			Vector3 pos = entity.transform.position;
+			var speed = angleOfRotation / duration;
+			pos.x = center.x+Mathf.Cos ( (2*Mathf.PI) - ( (Time.time - timeStart) * speed + startAngle)) * radius;
+			pos.y = center.y+Mathf.Sin((2*Mathf.PI) - ((Time.time - timeStart) * speed + startAngle)) * radius;
+			entity.transform.position = pos;
 		}
-		return v;
-	}
-	
 
-	float CircleHelperAngle(Vector3 point,Vector3 center, float radius){
+	}
+
+
+	float CircleHelperAngle(Vector3 point,Vector3 center, float radius, bool ccw){
 		var acos = Mathf.Acos((point.x - center.x) / radius);
 		var asin = Mathf.Asin ((point.y - center.y) / radius);
-		
-		float angle;
-		if (asin > 0) { //top-half
-			angle = acos;
-		} else { //bottom-half
-			angle = Mathf.PI * 2 - acos;
+
+
+		if (ccw) {
+
+			float angle;
+			if (asin > 0 || double.IsNaN(asin)) { //top-half
+				angle = acos;
+			} else { //bottom-half
+				angle = Mathf.PI * 2 - acos;
+			}
+			
+			return angle%(2*Mathf.PI);
+		} else {
+			float angle;
+			if (asin > 0) { //bottom-half
+				angle = acos;
+			} else { //top-half
+				angle = Mathf.PI * 2 - acos;
+			}
+			
+			return angle%(2*Mathf.PI);
 		}
-		
-		return angle%(2*Mathf.PI);
 	}
 
 
@@ -317,6 +402,10 @@ public class MovementPrimitive{
 	public Vector3 circleCenter;
 	public float rotationAngle;
 	public float radius;
+	public bool ccw;
+	public float amplitude;
+	public float frequency;
+	public float phase;
 
 	public MovementPrimitive (){}
 	

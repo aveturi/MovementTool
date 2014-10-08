@@ -1,14 +1,16 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/TestCirc.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/TestSin.cs">
     <Files>
-      <File FileName="Assets/Movement.cs" Line="49" Column="8" />
-      <File FileName="Assets/TestCirc.cs" Line="41" Column="59" />
+      <File FileName="Assets/TestCirc.cs" Line="29" Column="3" />
+      <File FileName="Assets/Movement.cs" Line="69" Column="12" />
+      <File FileName="Assets/Marker.cs" Line="6" Column="15" />
+      <File FileName="Assets/TestSin.cs" Line="16" Column="60" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Breakpoint file="/Users/anuraagveturi/eecs494/P2/MovementTool/Assets/Movement.cs" line="211" />
+      <Breakpoint file="/Users/anuraagveturi/eecs494/P2/MovementTool/Assets/Movement.cs" line="313" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
