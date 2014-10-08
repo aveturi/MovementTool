@@ -1,0 +1,8 @@
+Type|startPoint|endPoint|duration|startTime|curveDepth|circleCenter|rotationAngle|radius|ccw|amplitude|frequency|phase|timeDelta|timeDeltaSum
+Line|(0.0, 0.0, 0.0)|(10.0, 10.0, 0.0)|2|0|(0.0, 0.0, 0.0)|(0.0, 0.0, 0.0)|0|0|False|0|0|0|0|0
+Line|(10.0, 10.0, 0.0)|(0.0, 0.0, 0.0)|2|0|(0.0, 0.0, 0.0)|(0.0, 0.0, 0.0)|0|14.14214|False|0|0|0|0|0
+Sin|(0.0, 0.0, 0.0)|(10.0, 10.0, 0.0)|2|0|(0.0, 0.0, 0.0)|(0.0, 0.0, 0.0)|0|0|False|2|2|0|0|0
+Curve|(10.0, 10.0, 0.0)|(0.0, 0.0, 0.0)|2|0|(10.0, 0.0, 0.0)|(0.0, 0.0, 0.0)|0|14.14214|False|0|0|0|0|0
+Circle|(0.0, 0.0, 0.0)|(10.0, -10.0, 0.0)|2|0|(0.0, 0.0, 0.0)|(10.0, 0.0, 0.0)|1.570796|10|True|0|0|0|0|0
+PERIODIC|True
+REPETITIONS|0

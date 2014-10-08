@@ -1,17 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 
 public class Movement {
 
 	public enum Type {Line, Curve, Circle, Wait, Sin};
 
-
 	GameObject entity;
 
 	GameObject markerPrefab;
 
-	Type path;
 	Dictionary<string, object> list;
 
 	List<MovementPrimitive> movementPrimitivesList;
@@ -31,14 +30,53 @@ public class Movement {
 		this.movementPrimitivesList = new List<MovementPrimitive> ();
 	}
 
+	public Movement(GameObject entity, string filePath){
+		this.entity = entity;
+		this.movementPrimitivesList = new List<MovementPrimitive> ();
+		var sr = new StreamReader (filePath);
+		var firstLine = sr.ReadLine ();
+		while (!sr.EndOfStream) {
+			var line = sr.ReadLine();
+			if(line.Contains("PERIODIC")){
+				var sp = line.Split('|');
+				this.periodic = (sp[1] == "True");
+			} else if(line.Contains("REPETITIONS")){
+				var sp = line.Split('|');
+				int.TryParse(sp[1],out repetitions);
+			} else {
+				this.movementPrimitivesList.Add(new MovementPrimitive(line));
+			}
+		}
+
+		sr.Close ();
+	}
+
+
 	public object this[int i]
 	{
 		get { return this.GetPrimitiveAsString(i); }
 	}
 
+	public void SetPrimitiveDelta(int idx, float delta){
+		movementPrimitivesList [idx].timeDelta = delta;
+	}
+
+	public void SaveMovementToFile(string filename){
+		var file = File.CreateText (filename);
+		file.WriteLine (MovementPrimitive.FirstLine ());
+		foreach (var item in movementPrimitivesList) {
+			file.WriteLine(item.GetFullState());
+		}
+
+		file.WriteLine ("PERIODIC|" + periodic);
+		file.WriteLine ("REPETITIONS|" + repetitions);
+		file.Flush ();
+		file.Close ();
+	}
+
 	public string GetPrimitiveAsString(int index){
 		var prim = movementPrimitivesList [index];
-				
+		Debug.Log (prim.GetFullState ());
 		if (prim.path == Type.Line) {
 				return prim.path +
 						" start " + prim.startPoint + 
@@ -76,10 +114,13 @@ public class Movement {
 
 	public void ChainLine(Vector3 end, float dur){
 		if (movementPrimitivesList.Count == 0) {
-			throw new UnityException("Can't chain a motion event to an empty event set!There should be at least one movement first");
+			throw new UnityException ("Can't chain a motion event to an empty event set!There should be at least one movement first");
 		}
-
 		this.AddLine (movementPrimitivesList [movementPrimitivesList.Count - 1].endPoint, end, dur);
+	}
+
+	public void ChainWait(float dur){
+		this.AddWait (dur, movementPrimitivesList [movementPrimitivesList.Count - 1].endPoint);
 	}
 
 
@@ -127,8 +168,8 @@ public class Movement {
 		this.movementPrimitivesList.Add (new MovementPrimitive (Movement.Type.Curve,start,end,dur,dep));
 	}
 
-	public void AddWait(float waitTime){
-		this.movementPrimitivesList.Add (new MovementPrimitive(Movement.Type.Wait,Vector3.zero,Vector3.zero,waitTime));
+	public void AddWait(float waitTime, Vector3 waitPoint = default(Vector3)){
+		this.movementPrimitivesList.Add (new MovementPrimitive(Movement.Type.Wait,waitPoint,Vector3.zero,waitTime));
 	}
 
 	public void AddCounterClockwiseCircle(Vector3 start,Vector3 center, float radians, float duration){
@@ -232,25 +273,35 @@ public class Movement {
 
 
 	private void RunPrimitive(MovementPrimitive current){
+
+		UpdateDeltaDuration (current);
+
 		if (current.path == Type.Line) {
-			MoveAlongLineSegment (current.startPoint, current.endPoint, current.startTime, current.duration);
+				MoveAlongLineSegment (current.startPoint, current.endPoint, current.startTime, current.duration + current.timeDeltaSum);
 		} else if (current.path == Type.Curve) {
-			MoveAlongCurve (current.startPoint, current.endPoint, current.curveDepth, current.startTime, current.duration);
+				MoveAlongCurve (current.startPoint, current.endPoint, current.curveDepth, current.startTime, current.duration + current.timeDeltaSum);
 		} else if (current.path == Type.Circle) {
-			MoveAlongCircle (current.startPoint, current.endPoint, current.startTime, current.duration, 
-	               current.circleCenter, current.rotationAngle, current.radius, current.ccw);
+				MoveAlongCircle (current.startPoint, current.endPoint, current.startTime, current.duration + current.timeDeltaSum, 
+       current.circleCenter, current.rotationAngle, current.radius, current.ccw);
 		} else if (current.path == Type.Sin) {
-			MoveAlongSineWave(current.startPoint, current.endPoint,current.startTime,current.duration,
-			                  current.amplitude,current.frequency, current.phase);
+				MoveAlongSineWave (current.startPoint, current.endPoint, current.startTime, current.duration + current.timeDeltaSum,
+	                  current.amplitude, current.frequency, current.phase);
+		} else if (current.path == Type.Wait) {
+			entity.transform.position = current.startPoint;
 		}
 	}
 
+	private void UpdateDeltaDuration(MovementPrimitive m){
+		m.timeDeltaSum += m.timeDelta;
+	}
+
+
 	private List<MovementPrimitive> AdjustTimes(List<MovementPrimitive> list){
 		list[0].startTime = Time.time;
-		//list [0].print ();
+		list [0].timeDeltaSum = 0;
 		for(int i=1; i< list.Count; i++){
 			list[i].startTime = list[i-1].startTime + list[i-1].duration;
-			//list[i].print();
+			list[i].timeDeltaSum = 0;
 		}
 
 		return list;
@@ -419,8 +470,8 @@ public class Movement {
 	}
 	// ----------------------------------------------------------------
 
-	
 	private class MovementPrimitive{
+
 		public Movement.Type path;
 		public Vector3 startPoint;
 		public Vector3 endPoint;
@@ -434,8 +485,9 @@ public class Movement {
 		public float amplitude;
 		public float frequency;
 		public float phase;
-		public bool damping;
-		
+		public float timeDelta;
+		public float timeDeltaSum;
+
 		public MovementPrimitive (){}
 		
 		public MovementPrimitive(Movement.Type path, Vector3 start, Vector3 end, float dur,Vector3 dep = default(Vector3), Vector3 center = default(Vector3),float rotationAngle = 0){
@@ -448,6 +500,72 @@ public class Movement {
 			this.rotationAngle = rotationAngle;
 			this.startTime = 0;
 			this.radius = Vector3.Distance (circleCenter, startPoint);
+			this.timeDelta = 0;
+			this.timeDeltaSum = 0;
+		}
+
+		private Vector3 StringToVector(string str){
+			
+			var split = str.TrimStart ('(').TrimEnd (')').Split (',');
+			
+			float x, y, z=0;
+			float.TryParse (split [0], out x);
+			float.TryParse (split [1], out y);
+			if (split.Length == 3) {
+				float.TryParse (split [2], out z);
+			}
+			return new Vector3(x,y,z);
+		}
+		public MovementPrimitive(string stateString){
+			var split = stateString.Split('|');
+			if(split[0] == "Line"){
+				path = Type.Line;
+			} else if(split[0] == "Circle"){
+				path = Type.Circle;
+			} else if (split[0] == "Sin"){
+				path = Type.Sin;
+			} else if (split[0] == "Curve"){
+				path = Type.Curve;
+			} else if (split[0] == "Wait"){
+				path = Type.Wait;
+			}
+
+			startPoint = StringToVector(split[1]);
+			endPoint = StringToVector(split[2]);
+			float.TryParse(split[3],out duration);
+			float.TryParse(split[4],out startTime);
+			curveDepth = StringToVector(split[5]);
+			circleCenter = StringToVector(split[6]);
+			float.TryParse(split[7],out rotationAngle);
+			float.TryParse(split[8],out radius);
+			this.ccw = (split[9] == "True");
+			float.TryParse(split[10],out amplitude);
+			float.TryParse(split[11],out frequency);
+			float.TryParse(split[12],out phase);
+			float.TryParse(split[13],out timeDelta);
+			float.TryParse(split[14],out timeDeltaSum);
+		}
+
+		public string GetFullState(){
+			return path 
+					+ "|" + startPoint 
+					+ "|" + endPoint 
+					+ "|" + duration 
+					+ "|" + startTime 
+					+ "|" + curveDepth 
+					+ "|" + circleCenter 
+					+ "|" + rotationAngle 
+					+ "|" + radius 
+					+ "|" + ccw 
+					+ "|" + amplitude 
+					+ "|" + frequency 
+					+ "|" + phase 
+					+ "|" + timeDelta 
+					+ "|" + timeDeltaSum;
+		}
+
+		public static string FirstLine(){
+			return "Type|startPoint|endPoint|duration|startTime|curveDepth|circleCenter|rotationAngle|radius|ccw|amplitude|frequency|phase|timeDelta|timeDeltaSum";
 		}
 	}                         
 }
