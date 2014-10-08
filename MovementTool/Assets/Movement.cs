@@ -44,11 +44,15 @@ public class Movement {
 		this.movementPrimitivesList.Add (new MovementPrimitive(Movement.Type.Wait,Vector3.zero,Vector3.zero,waitTime));
 	}
 
-	public void Add2DCircular(Vector3 start,Vector3 center, float degrees, float duration){
+	public void Add2DCircular(Vector3 start,Vector3 center, float radians, float duration){
 
-		float startAngle = 
+		var radius = Vector3.Distance (start, center);
 
-		//MovementPrimitive(Movement.Type,Circular,start,end, dur,Vector3.zero, center,rotationAngle);
+		var startAngle = CircleHelperAngle (start, center, radius);
+		var end = CircleHelperPoint (radians+startAngle, center, radius);
+
+		this.movementPrimitivesList.Add( new MovementPrimitive(Movement.Type.Circle,start,end, 
+		                                                       duration,Vector3.zero, center,radians));
 	}
 
 
@@ -107,6 +111,7 @@ public class Movement {
 			GameObject x = GameObject.Instantiate(markerPrefab) as GameObject;
 			x.transform.position = entity.transform.position;
 		}
+
 		RunPrimitive (current);
 	}
 
@@ -126,7 +131,8 @@ public class Movement {
 		} else if (current.path == Type.Curve) {
 			MoveAlongCurve (current.startPoint, current.endPoint, current.curveDepth, current.startTime, current.duration);
 		} else if (current.path == Type.Circle) {
-			MoveAlongCircle(current.startPoint, current.endPoint, current.startTime, current.duration, current.curveDepth,current.rotationAngle);
+			MoveAlongCircle(current.startPoint, current.endPoint, current.startTime, current.duration, 
+			                current.curveDepth,current.rotationAngle, current.radius);
 		}
 	}
 
@@ -206,10 +212,60 @@ public class Movement {
 		}
 	}
 
-	void MoveAlongCircle(Vector3 start, Vector3 end,float timeStart, float duration,Vector3 center, float angleOfRotation){
+	void MoveAlongCircle(Vector3 start, Vector3 end,float timeStart, float duration,
+	                     Vector3 center, float angleOfRotation, float radius){
 
+		var startAngle = CircleHelperAngle (start, center, radius);
+		//var angleSoFar = CircleHelperRelativeAngle (entity.transform.position, start, center, radius);
+
+		Vector3 pos = entity.transform.position;
+		var speed = angleOfRotation / duration;
+		pos.x = center.x+Mathf.Cos ( (Time.time - timeStart) * speed + startAngle) * radius;
+		pos.y = center.y+Mathf.Sin((Time.time - timeStart) * speed + startAngle) * radius;
+		//Debug.Log ("angle so far " + angleSoFar);
+		//if(angleSoFar < angleOfRotation)
+		entity.transform.position = pos;
 
 	}
+
+
+	float CircleHelperRelativeAngle(Vector3 point, Vector3 start, Vector3 center,float radius){
+		var a = CircleHelperAngle (point, center, radius);
+		var b = CircleHelperAngle (start, center, radius);
+		
+		float v;
+		if (b < a) {
+			v =  (a-b) % (2*Mathf.PI);
+		} else {
+			v = (a-b )% (2*Mathf.PI);
+		}
+		return v;
+	}
+	
+
+	float CircleHelperAngle(Vector3 point,Vector3 center, float radius){
+		var acos = Mathf.Acos((point.x - center.x) / radius);
+		var asin = Mathf.Asin ((point.y - center.y) / radius);
+		
+		float angle;
+		if (asin > 0) { //top-half
+			angle = acos;
+		} else { //bottom-half
+			angle = Mathf.PI * 2 - acos;
+		}
+		
+		return angle%(2*Mathf.PI);
+	}
+
+
+	Vector3 CircleHelperPoint(float angle, Vector3 center, float radius){
+		Vector3 p = new Vector3 (0, 0, 0);
+		p.x = center.x + radius * Mathf.Cos (angle);
+		p.y = center.y + radius * Mathf.Sin (angle);
+		return p;
+	}
+
+
 
 	
 	// THESE FUNCTIONS ARE TAKEN FROM THE TEXTBOOK-------------------
@@ -260,6 +316,7 @@ public class MovementPrimitive{
 	public Vector3 curveDepth;
 	public Vector3 circleCenter;
 	public float rotationAngle;
+	public float radius;
 
 	public MovementPrimitive (){}
 	
@@ -272,10 +329,11 @@ public class MovementPrimitive{
 		curveDepth = dep;
 		this.rotationAngle = rotationAngle;
 		this.startTime = 0;
+		this.radius = Vector3.Distance (circleCenter, startPoint);
 	}
 
 	public void print(){
-		Debug.Log(path+" "+startPoint+" "+endPoint + " " +startTime + " " +duration);
+		Debug.Log(path+" "+startPoint+" "+endPoint + " " +startTime + " " +duration+ " "+radius);
 	}
 
 }
