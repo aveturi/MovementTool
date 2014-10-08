@@ -1,6 +1,5 @@
-build up a path out of pairs of points and a specific movement between each 
-pair
-
 do a damping motion thing
 
-should be able to append a motion instead of adding it.
+do square waves, saw-tooth waves, triangular waves
+
+

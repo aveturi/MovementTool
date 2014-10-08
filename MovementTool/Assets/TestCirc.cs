@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class TestCirc : MonoBehaviour {
@@ -27,7 +27,7 @@ public class TestCirc : MonoBehaviour {
 		movement.AddCounterclockwiseCircle (s2, c, rotationAngle, dur);
 		movement.AddWait (dur);*/
 
-		movement.AddCounterclockwiseCircle ( new Vector2(0,10), new Vector2(0,1), Mathf.Deg2Rad*270f, dur);
+		movement.AddCounterClockwiseCircle ( new Vector2(0,10), new Vector2(0,1), Mathf.Deg2Rad*270f, dur);
 
 		movement.SetRepeat ();
 		movement.setMarker (marker);

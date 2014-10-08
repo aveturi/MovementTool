@@ -52,6 +52,7 @@
      <Compile Include="Assets\Test.cs" />
      <Compile Include="Assets\TestChain.cs" />
      <Compile Include="Assets\TestCirc.cs" />
+     <Compile Include="Assets\TestFig.cs" />
      <Compile Include="Assets\TestSin.cs" />
      <Compile Include="Assets\TestTwo.cs" />
   </ItemGroup>

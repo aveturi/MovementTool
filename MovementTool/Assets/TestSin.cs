@@ -17,11 +17,14 @@ public class TestSin : MonoBehaviour {
 		movement.ChainSin (new Vector2 (-10,10), 3, 2f, 0.5f);
 		movement.ChainCounterClockwiseCircle (Vector2.zero,90f*Mathf.Deg2Rad, 3);
 
+		//Debug.Log (movement[0]);
+		//Debug.Log (movement[1]);
+		//Debug.Log (movement[2]);
+
 		movement.setMarker (marker);
 		movement.ToggleTrail ();
 		movement.SetRepeat ();
 		movement.Start ();
-	
 	}
 	
 	// Update is called once per frame
