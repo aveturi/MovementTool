@@ -61,6 +61,15 @@ public class Movement {
 		}
 	}
 
+	public void ShiftMovementByPoint(Vector3 shift){
+		foreach (var item in movementPrimitivesList) {
+			item.circleCenter += shift;
+			item.curveDepth += shift;
+			item.endPoint += shift;
+			item.startPoint += shift;
+		}
+	}
+
 	/// <summary>
 	/// Gets the <see cref="Movement"/> at the specified index.
 	/// </summary>

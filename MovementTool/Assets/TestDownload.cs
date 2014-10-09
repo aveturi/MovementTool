@@ -9,6 +9,7 @@ public class TestDownload : MonoBehaviour {
 	void Start () {
 		movement = Movement.InitMovementFromUrl(this.gameObject,"http://localhost/?name=FigOfEightish");
 
+		movement.ShiftMovementByPoint (new Vector2 (-10, -10));
 		movement.setMarker (marker);
 		movement.ToggleTrail ();
 		movement.Start ();
