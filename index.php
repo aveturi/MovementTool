@@ -1,5 +1,6 @@
 <?php
 
+#THIS IS A STUB THAT TAKES GET AND POST REQUESTS
 
 if(strlen($_POST["name"])){
 $file = "movements/".$_POST["name"];
