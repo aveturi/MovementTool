@@ -1,9 +1,13 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/FigureOfEight.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/TestStuff.cs">
     <Files>
-      <File FileName="Assets/TestTwo.cs" Line="26" Column="5" />
       <File FileName="Assets/FigureOfEight.cs" Line="39" Column="3" />
+      <File FileName="Assets/TestFig.cs" Line="18" Column="26" />
+      <File FileName="Assets/Movement.cs" Line="582" Column="65" />
+      <File FileName="Assets/TestDownload.cs" Line="12" Column="53" />
+      <File FileName="Assets/TestStuff.cs" Line="39" Column="41" />
+      <File FileName="Assets/Marker.cs" Line="6" Column="14" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

@@ -293,6 +293,7 @@ public class Movement {
 		movementPrimitivesList [movementPrimitivesList.Count - 1].phase = phase;
 	}
 
+
 	/// <summary>
 	/// Adds a CURVE primitive to the current movement.
 	/// </summary>
@@ -528,6 +529,19 @@ public class Movement {
 		entity.transform.position = pos;
 	}
 
+	// TODO: use this for sine wave where the oscillation is along vertical.
+	void MoveAlongVertSineWave(Vector3 start, Vector3 end, float timeStart,float dur, float amplitude, float freq, float phase){
+		
+		//update the linear position first
+		MoveAlongLineSegment (start, end, timeStart,dur);
+		
+		//change the y coord
+		var x = amplitude * Mathf.Sin (2 * Mathf.PI * freq * (Time.time - timeStart) + phase);
+		var pos = entity.transform.position;
+		pos.x += x;
+		entity.transform.position = pos;
+	}
+
 	bool MoveAlongLineSegment(Vector3 p1,Vector3 p2, float timeStart, float duration){
 
 		float u = (Time.time - timeStart) / duration;
@@ -579,6 +593,7 @@ public class Movement {
 
 	//This can be tweaked in many ways depending on how you want to define your circular movement.
 	// for now it just assumes the stupid way.
+	// TODO: WORKS ACCURATELY FOR CCW MOVEMENT, FIX FOR CW MOVEMENT
 	float CircleHelperAngle(Vector3 point,Vector3 center, float radius, bool ccw){
 
 		if (point == center)

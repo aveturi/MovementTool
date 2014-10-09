@@ -60,6 +60,9 @@ public void ChainClockwiseCircle(Vector3 center, float radians, float duration);
 
 ##############
 
+// this allows you to shift the entire movement by the point shift
+public void ShiftMovementByPoint(Vector3 shift);
+
 public void Start();
 
 public void SetRepeat(int num = 0);

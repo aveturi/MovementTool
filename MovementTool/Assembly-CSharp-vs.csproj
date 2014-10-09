@@ -46,13 +46,15 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\FigureOfEight.cs" />
+     <Compile Include="Assets\Examples\Example.cs" />
+     <Compile Include="Assets\Examples\FigureOfEight.cs" />
+     <Compile Include="Assets\Examples\TestChain.cs" />
+     <Compile Include="Assets\Examples\TestDownload.cs" />
+     <Compile Include="Assets\Examples\TestFig.cs" />
+     <Compile Include="Assets\Examples\TestSin.cs" />
+     <Compile Include="Assets\Examples\TestStuff.cs" />
      <Compile Include="Assets\Marker.cs" />
      <Compile Include="Assets\Movement.cs" />
-     <Compile Include="Assets\TestChain.cs" />
-     <Compile Include="Assets\TestDownload.cs" />
-     <Compile Include="Assets\TestFig.cs" />
-     <Compile Include="Assets\TestSin.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
