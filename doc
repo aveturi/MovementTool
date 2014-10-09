@@ -11,9 +11,11 @@ There are 5 types of simple movements, I will call these "primitives" :
 Complex movements are formed by chaining primitives.
 For all the methods listed below, there are more detailed usage notes near the function itself in the code.
 
+There are also a bunch of examples under the Assets/Examples folder.
+
 NOTE: "Teleportation" can be achieved by setting a waitPoint in the WAIT primitive.
 
-############## CONSTRUCTORS
+-------------- CONSTRUCTORS
 
 public Movement(GameObject entity);
 
@@ -23,7 +25,7 @@ public static Movement InitMovementFromFile(GameObject entity, string filename);
 
 public static Movement InitMovementFromUrl(GameObject entity, string url);
 
-############## ADD METHODS
+-------------- ADD METHODS
 /// These methods allow you to add the aforementioned primitives to the current movement 
 /// set. Primitives will be executed in the order in which they are added.
 
@@ -40,7 +42,7 @@ public void AddCounterClockwiseCircle(Vector3 start,Vector3 center, float radian
 public void AddClockwiseCircle(Vector3 start, Vector3 center, float radians, float duration);
 
 
-############## CHAIN METHODS
+-------------- CHAIN METHODS
 /// The Chain methods are similar to the  Add* methods, but they start off
 /// where the previous primitive ends. Running Chain* on an empty primitive
 /// set will cause an error.
@@ -58,7 +60,7 @@ public void ChainCounterClockwiseCircle(Vector3 center, float radians, float dur
 public void ChainClockwiseCircle(Vector3 center, float radians, float duration);
 
 
-##############
+--------------
 
 // this allows you to shift the entire movement by the point shift
 public void ShiftMovementByPoint(Vector3 shift);
@@ -78,7 +80,7 @@ public void setMarker(GameObject m);
 public void Update();
 
 
-############## AUXILIARY METHODS
+-------------- AUXILIARY METHODS
 
 // returns the state of the primitive at the specified index
 public object this[int i];
@@ -90,7 +92,7 @@ public void PostMovement(string url, string movementName);
 public string GetPrimitiveAsString(int index);
 
 
-############## OTHER WEIRD TUNING AVAILABLE
+-------------- OTHER WEIRD TUNING AVAILABLE
 
 // This is an experimental tuning feature that allows the user to add a
 // damping effect to the motion of the object by tuning the delta value.
