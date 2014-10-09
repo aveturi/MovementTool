@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class Example : MonoBehaviour {
@@ -28,10 +28,10 @@ public class Example : MonoBehaviour {
 		m.ChainLine (s1, dur);
 		m.ChainCounterClockwiseCircle (c1, Mathf.Deg2Rad * 360f, dur);
 		m.ChainCounterClockwiseCircle (c2, Mathf.Deg2Rad * 360f, dur);
-		m.ChainSin (s3, dur, 2f, 2f);
-		m.ChainSin (s1, dur, 2f, 2f);
-		m.ChainSin (s2, dur, 2f, 2f);
-		m.ChainSin (s1, dur, 2f, 2f);
+		m.ChainSine (s3, dur, 2f, 2f);
+		m.ChainSine (s1, dur, 2f, 2f);
+		m.ChainSine (s2, dur, 2f, 2f);
+		m.ChainSine (s1, dur, 2f, 2f);
 		m.ChainCounterClockwiseCircle (c3, Mathf.Deg2Rad * 360f, dur*4);
 		m.ChainCounterClockwiseCircle (c4, Mathf.Deg2Rad * 360f, dur * 4);
 		m.ChainCounterClockwiseCircle (s2, Mathf.Deg2Rad * 360f, dur * 3);

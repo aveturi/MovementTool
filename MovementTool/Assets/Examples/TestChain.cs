@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class TestChain : MonoBehaviour {
@@ -16,7 +16,7 @@ public class TestChain : MonoBehaviour {
 		Vector2 d1 = new Vector2 (10, 0);
 		movement.AddLine(p0,p1,dur);
 		movement.ChainLine (p0, dur);
-		movement.ChainSin (p1, dur, 2, 2);
+		movement.ChainSine (p1, dur, 2, 2);
 		movement.ChainCurve (p0, dur, d1);
 		movement.ChainCounterClockwiseCircle (d1, Mathf.Deg2Rad * 90, dur);
 
