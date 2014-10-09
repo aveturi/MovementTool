@@ -230,7 +230,7 @@ public class Movement {
 	/// <param name="amplitude">The amplitude of the sinusoidal movement</param>
 	/// <param name="freq">The frequency of the sinusoidal movement</param>
 	/// <param name="phase">The phase of the sinusoidal movement</param>
-	public void Appendsine(Vector3 end, float dur, float amplitude, float freq, float phase=0){
+	public void ChainSine(Vector3 end, float dur, float amplitude, float freq, float phase=0){
 		if (movementPrimitivesList.Count == 0) {
 			throw new UnityException("Can't chain a motion event to an empty event set!There should be at least one movement first");
 		}
