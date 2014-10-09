@@ -1,5 +1,7 @@
 Movement Composition Library
 
+FOR BETTER DOCUMENTATION GO TO documentation/index.html in a web browser.
+
 This tool allows you to "compose" complex 2d motion by chaining simple
 2D movements together in configurable ways!
 
