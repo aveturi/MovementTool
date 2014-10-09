@@ -49,13 +49,10 @@
      <Compile Include="Assets\FigureOfEight.cs" />
      <Compile Include="Assets\Marker.cs" />
      <Compile Include="Assets\Movement.cs" />
-     <Compile Include="Assets\Test.cs" />
      <Compile Include="Assets\TestChain.cs" />
-     <Compile Include="Assets\TestCirc.cs" />
      <Compile Include="Assets\TestDownload.cs" />
      <Compile Include="Assets\TestFig.cs" />
      <Compile Include="Assets\TestSin.cs" />
-     <Compile Include="Assets\TestTwo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

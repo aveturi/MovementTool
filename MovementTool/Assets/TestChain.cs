@@ -8,7 +8,7 @@ public class TestChain : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		/*movement = new Movement (this.gameObject);
+		movement = new Movement (this.gameObject);
 
 		float dur = 2f;
 		Vector2 p0 = new Vector2 (0, 0);
@@ -20,14 +20,12 @@ public class TestChain : MonoBehaviour {
 		movement.ChainCurve (p0, dur, d1);
 		movement.ChainCounterClockwiseCircle (d1, Mathf.Deg2Rad * 90, dur);
 
-		//movement.setMarker (marker);
-		//movement.ToggleTrail ();
+		movement.setMarker (marker);
+		movement.ToggleTrail ();
 		movement.SetRepeat ();
 		movement.SaveMovementToFile (Application.dataPath+"/Movements/hello");
 
-*/
 
-		movement = Movement.InitMovementFromUrl (this.gameObject, "http://localhost/?name=theAwesomeMovement");
 		movement.Start ();
 	}
 	
@@ -35,8 +33,5 @@ public class TestChain : MonoBehaviour {
 	void Update () {
 		movement.Update ();
 	}
-
-	void func(){}
-
-
+	
 }

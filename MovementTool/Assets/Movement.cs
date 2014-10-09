@@ -137,6 +137,9 @@ public class Movement {
 		f.AddField ("name", movementName);
 		f.AddField ("movement", StringifyMovement());
 		WWW x = new WWW (url,f);
+		if (x.error != null) {
+			throw new UnityException("POST movement to URL failed");
+		}
 	}
 
 	/// <summary>
