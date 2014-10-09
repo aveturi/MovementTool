@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 public class Movement {
 
@@ -30,14 +31,16 @@ public class Movement {
 		this.movementPrimitivesList = new List<MovementPrimitive> ();
 	}
 
-	public Movement(GameObject entity, string filePath){
+	public Movement(GameObject entity, string data){
 		this.entity = entity;
 		this.movementPrimitivesList = new List<MovementPrimitive> ();
-		var sr = new StreamReader (filePath);
-		var firstLine = sr.ReadLine ();
-		while (!sr.EndOfStream) {
-			var line = sr.ReadLine();
-			if(line.Contains("PERIODIC")){
+		var dataLines = data.Split ('\n');
+
+		for(int i=1; i<dataLines.Length; ++i ){
+
+			var line = dataLines[i];
+			if(line.Length == 0){
+			} else if(line.Contains("PERIODIC")){
 				var sp = line.Split('|');
 				this.periodic = (sp[1] == "True");
 			} else if(line.Contains("REPETITIONS")){
@@ -47,8 +50,6 @@ public class Movement {
 				this.movementPrimitivesList.Add(new MovementPrimitive(line));
 			}
 		}
-
-		sr.Close ();
 	}
 
 
@@ -61,22 +62,60 @@ public class Movement {
 		movementPrimitivesList [idx].timeDelta = delta;
 	}
 
+	public static Movement InitMovementFromFile(GameObject entity, string filename){
+		var data = File.ReadAllText (filename);
+		return new Movement (entity, data);
+	}
+
+	public static Movement InitMovementFromUrl(GameObject entity, string url){
+		WWW www = new WWW (url);
+
+		while (!www.isDone) {
+		//TODO:There MUST be a better way than this.
+			var err = www.error;
+			if(err != null){
+				Debug.Log("GET movement failed! "+err);
+				return null;
+			}
+		} 
+
+		if (www.isDone) {
+			var data = Encoding.UTF8.GetString (www.bytes, 0, www.bytes.Length);
+			return new Movement (entity, data);
+		} else {
+			throw new UnityException("GET on url failed!");
+		}
+	}
+
 	public void SaveMovementToFile(string filename){
 		var file = File.CreateText (filename);
-		file.WriteLine (MovementPrimitive.FirstLine ());
-		foreach (var item in movementPrimitivesList) {
-			file.WriteLine(item.GetFullState());
-		}
-
-		file.WriteLine ("PERIODIC|" + periodic);
-		file.WriteLine ("REPETITIONS|" + repetitions);
+		file.Write (StringifyMovement ());
 		file.Flush ();
 		file.Close ();
 	}
 
+
+	public void PostMovement(string url, string movementName){
+		WWWForm f = new WWWForm ();
+		f.AddField ("name", movementName);
+		f.AddField ("movement", StringifyMovement());
+		WWW x = new WWW (url,f);
+	}
+
+	private string StringifyMovement(){
+		string buffer = "";
+		buffer += (MovementPrimitive.FirstLine ())+'\n';
+		foreach (var item in movementPrimitivesList) {
+			buffer+=(item.GetFullState() +'\n');
+		}
+		
+		buffer += ("PERIODIC|" + periodic+'\n');
+		buffer += ("REPETITIONS|" + repetitions+'\n');
+		return buffer;
+	}
+
 	public string GetPrimitiveAsString(int index){
 		var prim = movementPrimitivesList [index];
-		Debug.Log (prim.GetFullState ());
 		if (prim.path == Type.Line) {
 				return prim.path +
 						" start " + prim.startPoint + 

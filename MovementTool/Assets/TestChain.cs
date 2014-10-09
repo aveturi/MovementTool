@@ -27,7 +27,7 @@ public class TestChain : MonoBehaviour {
 
 */
 
-		movement = new Movement (this.gameObject, Application.dataPath + "/Movements/hello");
+		movement = Movement.InitMovementFromUrl (this.gameObject, "http://localhost/?name=theAwesomeMovement");
 		movement.Start ();
 	}
 	

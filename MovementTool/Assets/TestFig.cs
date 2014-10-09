@@ -13,7 +13,6 @@ public class TestFig : MonoBehaviour {
 		movement = new Movement (this.gameObject);
 
 
-
 		movement.AddClockwiseCircle (Vector2.zero, new Vector2 (5, 0), Mathf.Deg2Rad * 360f, 3);
 		movement.ChainCounterClockwiseCircle (new Vector2 (-5, 0), Mathf.Deg2Rad * 360f, 3);
 		movement.ChainWait (3);
@@ -22,8 +21,12 @@ public class TestFig : MonoBehaviour {
 		movement.ToggleTrail ();
 		movement.SetRepeat (2);
 
-		//movement.SaveMovementToFile ("hello");
+		//movement.SaveMovementToFile ("asda");
 		//movement.Start ();
+
+		//movement.PostMovement ("http://localhost/", "theAwesomeMovement");
+
+		//Movement m = Movement.InitMovementFromUrl (this.gameObject, "http://localhost");
 	}
 	
 	// Update is called once per frame

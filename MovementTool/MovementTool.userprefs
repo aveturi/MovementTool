@@ -1,10 +1,12 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/TestFig.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/FigureOfEight.cs">
     <Files>
-      <File FileName="Assets/Movement.cs" Line="469" Column="3" />
+      <File FileName="Assets/Movement.cs" Line="76" Column="95" />
       <File FileName="Assets/Marker.cs" Line="6" Column="14" />
-      <File FileName="Assets/TestFig.cs" Line="11" Column="31" />
+      <File FileName="Assets/TestFig.cs" Line="27" Column="69" />
+      <File FileName="Assets/TestChain.cs" Line="36" Column="1" />
+      <File FileName="Assets/FigureOfEight.cs" Line="39" Column="61" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

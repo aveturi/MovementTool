@@ -22,24 +22,24 @@ public class FigureOfEight : MonoBehaviour {
 		Vector3 d4 = new Vector3 (0, 10, 0);
 
 		movement = new Movement (this.gameObject);
-		/*
-		movement.AddPrimitive (Movement.Type.Curve, p1, p2, duration, d3);
-		movement.AddPrimitive (Movement.Type.Curve,p2,p3,duration*2,d1);
-		movement.AddPrimitive (Movement.Type.Curve,p3,p1,duration,d4);
-		movement.AddPrimitive (Movement.Type.Curve,p1,p4,duration,d3);
-		movement.AddPrimitive (Movement.Type.Curve,p4,p5,duration*2,d2);
-		movement.AddPrimitive (Movement.Type.Curve,p5,p1,duration,d4);
-*/
-		//movement.setMarker (marker);
-		//movement.ToggleTrail ();
-		//movement.SetRepeat ();
-		//movement.SaveMovementToFile ("hello");
-		//movement.Start ();
 
-	
+		movement.AddCurve ( p1, p2, duration, d3);
+		movement.AddCurve(p2,p3,duration*2,d1);
+		movement.AddCurve(p3,p1,duration,d4);
+		movement.AddCurve(p1,p4,duration,d3);
+		movement.AddCurve(p4,p5,duration*2,d2);
+		movement.AddCurve(p5,p1,duration,d4);
+
+		movement.setMarker (marker);
+		movement.ToggleTrail ();
+		movement.SetRepeat ();
+
+		movement.Start ();
+
+		movement.PostMovement ("http://localhost/", "FigofEightish");
 	}
 
 	void FixedUpdate () {
-	//	movement.Update ();
+	 movement.Update ();
 	}
 }
