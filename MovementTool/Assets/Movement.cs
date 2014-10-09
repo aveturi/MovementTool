@@ -61,6 +61,10 @@ public class Movement {
 		}
 	}
 
+	/// <summary>
+	/// Shifts the movement by point shift.
+	/// </summary>
+	/// <param name="shift">Shift.</param>
 	public void ShiftMovementByPoint(Vector3 shift){
 		foreach (var item in movementPrimitivesList) {
 			item.circleCenter += shift;
