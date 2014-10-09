@@ -6,7 +6,7 @@ using System.Text;
 
 public class Movement {
 
-	public enum Type {Line, Curve, Circle, Wait, Sin};
+	private enum Type {Line, Curve, Circle, Wait, Sin};
 
 	GameObject entity;
 
@@ -25,12 +25,21 @@ public class Movement {
 	int repetitions = 0;
 	bool trail = false;
 
-
+	/// <summary>
+	/// Initializes a new instance of the <see cref="Movement"/> class.
+	/// </summary>
+	/// <param name="entity">Entity.</param>
 	public Movement(GameObject entity){
 		this.entity = entity;
 		this.movementPrimitivesList = new List<MovementPrimitive> ();
 	}
 
+	/// <summary>
+	/// Initializes a new instance of the <see cref="Movement"/> class
+	/// from a data string.
+	/// </summary>
+	/// <param name="entity">Entity.</param>
+	/// <param name="data">Data.</param>
 	public Movement(GameObject entity, string data){
 		this.entity = entity;
 		this.movementPrimitivesList = new List<MovementPrimitive> ();
@@ -52,21 +61,41 @@ public class Movement {
 		}
 	}
 
-
+	/// <summary>
+	/// Gets the <see cref="Movement"/> at the specified index.
+	/// </summary>
+	/// <param name="i">The index.</param>
 	public object this[int i]
 	{
 		get { return this.GetPrimitiveAsString(i); }
 	}
 
+	/// <summary>
+	/// Sets the delta tuning value for the primitive at the specified index.
+	/// </summary>
+	/// <param name="idx">Index.</param>
+	/// <param name="delta">Delta.</param>
 	public void SetPrimitiveDelta(int idx, float delta){
 		movementPrimitivesList [idx].timeDelta = delta;
 	}
 
+	/// <summary>
+	/// Inits the movement from file. The file must have been created by this class.
+	/// </summary>
+	/// <returns>The movement from file.</returns>
+	/// <param name="entity">Entity.</param>
+	/// <param name="filename">Filename.</param>
 	public static Movement InitMovementFromFile(GameObject entity, string filename){
 		var data = File.ReadAllText (filename);
 		return new Movement (entity, data);
 	}
 
+	/// <summary>
+	/// GETs the movement state from a URL. The state must have been stored by this class.
+	/// </summary>
+	/// <returns>The movement from URL.</returns>
+	/// <param name="entity">Entity.</param>
+	/// <param name="url">URL.</param>
 	public static Movement InitMovementFromUrl(GameObject entity, string url){
 		WWW www = new WWW (url);
 
@@ -87,6 +116,10 @@ public class Movement {
 		}
 	}
 
+	/// <summary>
+	/// Saves the movement to file.
+	/// </summary>
+	/// <param name="filename">Filename.</param>
 	public void SaveMovementToFile(string filename){
 		var file = File.CreateText (filename);
 		file.Write (StringifyMovement ());
@@ -94,7 +127,11 @@ public class Movement {
 		file.Close ();
 	}
 
-
+	/// <summary>
+	/// POSTs the movement to the specified URL.
+	/// </summary>
+	/// <param name="url">URL.</param>
+	/// <param name="movementName">Movement name.</param>
 	public void PostMovement(string url, string movementName){
 		WWWForm f = new WWWForm ();
 		f.AddField ("name", movementName);
@@ -102,18 +139,11 @@ public class Movement {
 		WWW x = new WWW (url,f);
 	}
 
-	private string StringifyMovement(){
-		string buffer = "";
-		buffer += (MovementPrimitive.FirstLine ())+'\n';
-		foreach (var item in movementPrimitivesList) {
-			buffer+=(item.GetFullState() +'\n');
-		}
-		
-		buffer += ("PERIODIC|" + periodic+'\n');
-		buffer += ("REPETITIONS|" + repetitions+'\n');
-		return buffer;
-	}
-
+	/// <summary>
+	/// Gets the primitive state.
+	/// </summary>
+	/// <returns>The primitive as string.</returns>
+	/// <param name="index">Index.</param>
 	public string GetPrimitiveAsString(int index){
 		var prim = movementPrimitivesList [index];
 		if (prim.path == Type.Line) {
@@ -151,6 +181,11 @@ public class Movement {
 		}
 	}
 
+	/// <summary>
+	/// Chains a LINE primitive to the current movement
+	/// </summary>
+	/// <param name="end">End.</param>
+	/// <param name="dur">Dur.</param>
 	public void ChainLine(Vector3 end, float dur){
 		if (movementPrimitivesList.Count == 0) {
 			throw new UnityException ("Can't chain a motion event to an empty event set!There should be at least one movement first");
@@ -158,11 +193,22 @@ public class Movement {
 		this.AddLine (movementPrimitivesList [movementPrimitivesList.Count - 1].endPoint, end, dur);
 	}
 
+	/// <summary>
+	/// Chains a WAIT primitive to the current movement
+	/// </summary>
+	/// <param name="dur">Dur.</param>
 	public void ChainWait(float dur){
 		this.AddWait (dur, movementPrimitivesList [movementPrimitivesList.Count - 1].endPoint);
 	}
 
-
+	/// <summary>
+	/// Chains a SIN primitive to the current movement
+	/// </summary>
+	/// <param name="end">End.</param>
+	/// <param name="dur">Dur.</param>
+	/// <param name="amplitude">Amplitude.</param>
+	/// <param name="freq">Freq.</param>
+	/// <param name="phase">Phase.</param>
 	public void ChainSin(Vector3 end, float dur, float amplitude, float freq, float phase=0){
 		if (movementPrimitivesList.Count == 0) {
 			throw new UnityException("Can't chain a motion event to an empty event set!There should be at least one movement first");
@@ -170,6 +216,12 @@ public class Movement {
 		this.AddSin (movementPrimitivesList [movementPrimitivesList.Count - 1].endPoint , end, dur, amplitude, freq, phase);
 	}
 
+	/// <summary>
+	/// Chains a CURVE primitive to the current movement
+	/// </summary>
+	/// <param name="end">End.</param>
+	/// <param name="dur">Dur.</param>
+	/// <param name="dep">Dep.</param>
 	public void ChainCurve(Vector3 end, float dur,Vector3 dep = default(Vector3)){
 		if (movementPrimitivesList.Count == 0) {
 			throw new UnityException("Can't chain a motion event to an empty event set!There should be at least one movement first");
@@ -177,6 +229,12 @@ public class Movement {
 		this.AddCurve (movementPrimitivesList [movementPrimitivesList.Count - 1].endPoint, end, dur, dep);
 	}
 
+	/// <summary>
+	/// Chains a counter clock wise CIRCLE primitive to the current movement
+	/// </summary>
+	/// <param name="center">Center.</param>
+	/// <param name="radians">Radians.</param>
+	/// <param name="duration">Duration.</param>
 	public void ChainCounterClockwiseCircle(Vector3 center, float radians, float duration){
 		if (movementPrimitivesList.Count == 0) {
 			throw new UnityException("Can't chain a motion event to an empty event set!There should be at least one movement first");
@@ -184,6 +242,12 @@ public class Movement {
 		this.AddCounterClockwiseCircle (movementPrimitivesList [movementPrimitivesList.Count - 1].endPoint, center, radians, duration);
 	}
 
+	/// <summary>
+	/// Chains a clock wise CIRCLE primitive to the current movement
+	/// </summary>
+	/// <param name="center">Center.</param>
+	/// <param name="radians">Radians.</param>
+	/// <param name="duration">Duration.</param>
 	public void ChainClockwiseCircle(Vector3 center, float radians, float duration){
 		if (movementPrimitivesList.Count == 0) {
 			throw new UnityException("Can't chain a motion event to an empty event set!There should be at least one movement first");
@@ -191,11 +255,25 @@ public class Movement {
 		this.AddClockwiseCircle (movementPrimitivesList [movementPrimitivesList.Count - 1].endPoint, center, radians, duration);
 	}
 
+	/// <summary>
+	/// Adds a LINE primitive to the current movement.
+	/// </summary>
+	/// <param name="start">Start.</param>
+	/// <param name="end">End.</param>
+	/// <param name="dur">Dur.</param>
 	public void AddLine(Vector3 start, Vector3 end, float dur){
 		this.movementPrimitivesList.Add (new MovementPrimitive (Movement.Type.Line,start,end,dur));
 	}
 
-	
+	/// <summary>
+	/// Adds a SIN primitive to the current movement.
+	/// </summary>
+	/// <param name="start">Start.</param>
+	/// <param name="end">End.</param>
+	/// <param name="dur">Dur.</param>
+	/// <param name="amplitude">Amplitude.</param>
+	/// <param name="freq">Freq.</param>
+	/// <param name="phase">Phase.</param>
 	public void AddSin(Vector3 start, Vector3 end, float dur, float amplitude, float freq, float phase=0){
 		this.movementPrimitivesList.Add (new MovementPrimitive (Movement.Type.Sin, start, end, dur));
 		movementPrimitivesList [movementPrimitivesList.Count - 1].amplitude = amplitude;
@@ -203,14 +281,33 @@ public class Movement {
 		movementPrimitivesList [movementPrimitivesList.Count - 1].phase = phase;
 	}
 
+	/// <summary>
+	/// Adds a CURVE primitive to the current movement.
+	/// </summary>
+	/// <param name="start">Start.</param>
+	/// <param name="end">End.</param>
+	/// <param name="dur">Dur.</param>
+	/// <param name="dep">Dep.</param>
 	public void AddCurve(Vector3 start, Vector3 end, float dur,Vector3 dep = default(Vector3)){
 		this.movementPrimitivesList.Add (new MovementPrimitive (Movement.Type.Curve,start,end,dur,dep));
 	}
 
+	/// <summary>
+	/// Adds a WAIT primitive to the current movement.
+	/// </summary>
+	/// <param name="waitTime">Wait time.</param>
+	/// <param name="waitPoint">Wait point.</param>
 	public void AddWait(float waitTime, Vector3 waitPoint = default(Vector3)){
 		this.movementPrimitivesList.Add (new MovementPrimitive(Movement.Type.Wait,waitPoint,Vector3.zero,waitTime));
 	}
 
+	/// <summary>
+	/// Adds a counter clock wise CIRCLE primitive to the current movement.
+	/// </summary>
+	/// <param name="start">Start.</param>
+	/// <param name="center">Center.</param>
+	/// <param name="radians">Radians.</param>
+	/// <param name="duration">Duration.</param>
 	public void AddCounterClockwiseCircle(Vector3 start,Vector3 center, float radians, float duration){
 		if (radians > Mathf.PI * 2) {
 			throw new UnityException("Can't rotate more than 2*PI, use multiple circles or concat if necessary");
@@ -225,6 +322,13 @@ public class Movement {
 		movementPrimitivesList [movementPrimitivesList.Count - 1].ccw = true;
 	}
 
+	/// <summary>
+	/// Adds a clock wise CIRCLE primitive to the current movement.
+	/// </summary>
+	/// <param name="start">Start.</param>
+	/// <param name="center">Center.</param>
+	/// <param name="radians">Radians.</param>
+	/// <param name="duration">Duration.</param>
 	public void AddClockwiseCircle(Vector3 start, Vector3 center, float radians, float duration){
 		if (radians > Mathf.PI * 2) {
 			throw new UnityException("Can't rotate more than 360 degrees, use multiple circles or concat if necessary");
@@ -241,7 +345,9 @@ public class Movement {
 	}
 
 
-
+	/// <summary>
+	/// Start this instance. Begins the movement timers. Movement.Update() needs to be called for motion to actually occur.
+	/// </summary>
 	public void Start(){
 		movementPrimitivesList = AdjustTimes(movementPrimitivesList) as List<MovementPrimitive>;
 		currentMovementidx = 0;
@@ -249,6 +355,10 @@ public class Movement {
 		this.running = true;
 	}
 
+	/// <summary>
+	/// Sets the number of repetitions of this movement. If left empty, the movement repeats infinitely.
+	/// </summary>
+	/// <param name="num">Number.</param>
 	public void SetRepeat(int num = 0){
 		if (num != 0) {
 			this.repetitions = num;
@@ -257,15 +367,24 @@ public class Movement {
 		}
 	}
 
+	/// <summary>
+	/// Toggles the trail left behind by the gameObject that the movement is attached to.
+	/// </summary>
 	public void ToggleTrail(){
 		trail = !trail;
 	}
 
+	/// <summary>
+	/// Sets the marker that will be left behind if trail is turned on.
+	/// </summary>
+	/// <param name="m">M.</param>
 	public void setMarker(GameObject m){
 		this.markerPrefab = m;
 	}
 
-
+	/// <summary>
+	/// Update this instance movement. Must be called from Monobehaviour::Update()
+	/// </summary>
 	public void Update(){
 		if (!running)
 						return;
@@ -482,15 +601,27 @@ public class Movement {
 		p.y = center.y + radius * Mathf.Sin (angle);
 		return p;
 	}
+
 	
+	private string StringifyMovement(){
+		string buffer = "";
+		buffer += (MovementPrimitive.FirstLine ())+'\n';
+		foreach (var item in movementPrimitivesList) {
+			buffer+=(item.GetFullState() +'\n');
+		}
+		
+		buffer += ("PERIODIC|" + periodic+'\n');
+		buffer += ("REPETITIONS|" + repetitions+'\n');
+		return buffer;
+	}
 
 	// THESE FUNCTIONS ARE FROM GIBSONS BOOK------------------------
-	static public Vector3 Lerp(Vector3 vFrom, Vector3 vTo, float u){
+	static private Vector3 Lerp(Vector3 vFrom, Vector3 vTo, float u){
 		Vector3 res = (1 - u) * vFrom + u * vTo;
 		return res;
 	}
 
-	static public Vector3 Bezier(float u, List<Vector3> vList){
+	static private Vector3 Bezier(float u, List<Vector3> vList){
 		if (vList.Count == 1) {
 			return( vList[0]);		
 		}
@@ -504,7 +635,7 @@ public class Movement {
 		return res;
 	}
 
-	static public Vector3 Bezier(float u, params Vector3[] vecs){
+	static private Vector3 Bezier(float u, params Vector3[] vecs){
 		return (Bezier (u, new List<Vector3> (vecs)));
 	}
 	// ----------------------------------------------------------------

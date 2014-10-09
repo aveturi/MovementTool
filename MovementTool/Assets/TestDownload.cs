@@ -7,7 +7,7 @@ public class TestDownload : MonoBehaviour {
 	Movement movement;
 	// Use this for initialization
 	void Start () {
-		movement = Movement.InitMovementFromUrl(this.gameObject,"http://localhost/?name=theAwesomeMovement");
+		movement = Movement.InitMovementFromUrl(this.gameObject,"http://localhost/?name=FigOfEightish");
 
 		movement.setMarker (marker);
 		movement.ToggleTrail ();
